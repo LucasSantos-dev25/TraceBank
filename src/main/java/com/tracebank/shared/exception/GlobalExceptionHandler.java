@@ -1,6 +1,9 @@
 package com.tracebank.shared.exception;
 
 import com.tracebank.customer.CustomerNotFoundException;
+import com.tracebank.transaction.AccountNotActiveException;
+import com.tracebank.transaction.InsufficientBalanceException;
+import com.tracebank.transaction.SelfTransferException;
 import com.tracebank.customer.CpfAlreadyRegisteredException;
 import com.tracebank.account.AccountNotFoundException;
 import org.springframework.http.HttpStatus;
@@ -36,6 +39,21 @@ public class GlobalExceptionHandler {
         ex.getBindingResult().getFieldErrors()
                 .forEach(erro -> erros.put(erro.getField(), erro.getDefaultMessage()));
         return ResponseEntity.badRequest().body(erros);
+    }
+
+    @ExceptionHandler(InsufficientBalanceException.class)
+    public ResponseEntity<ErrorResponse> handleInsufficientBalance(InsufficientBalanceException ex) {
+    return build(HttpStatus.UNPROCESSABLE_ENTITY, ex.getMessage());
+    }
+
+    @ExceptionHandler(AccountNotActiveException.class)
+    public ResponseEntity<ErrorResponse> handleAccountNotActive(AccountNotActiveException ex) {
+    return build(HttpStatus.UNPROCESSABLE_ENTITY, ex.getMessage());
+    }
+
+    @ExceptionHandler(SelfTransferException.class)
+    public ResponseEntity<ErrorResponse> handleSelfTransfer(SelfTransferException ex) {
+    return build(HttpStatus.BAD_REQUEST, ex.getMessage());
     }
 
     private ResponseEntity<ErrorResponse> build(HttpStatus status, String mensagem) {
