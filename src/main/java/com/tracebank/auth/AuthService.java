@@ -1,0 +1,69 @@
+package com.tracebank.auth;
+
+import com.tracebank.auth.dto.AuthResponse;
+import com.tracebank.auth.dto.LoginRequest;
+import com.tracebank.auth.dto.RegisterRequest;
+import com.tracebank.auth.dto.RegisterResponse;
+import com.tracebank.customer.Customer;
+import com.tracebank.customer.CustomerService;
+import com.tracebank.customer.dto.CustomerRequest;
+import lombok.RequiredArgsConstructor;
+
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+
+@Service
+@RequiredArgsConstructor
+public class AuthService {
+
+    private final AppUserRepository appUserRepository;
+    private final CustomerService customerService;
+    private final PasswordEncoder passwordEncoder;
+    private final AuthenticationManager authenticationManager;
+    private final JwtService jwtService;
+
+    @Transactional
+    public RegisterResponse register(RegisterRequest request) {
+        String email = normalizeEmail(request.email());
+
+        if (appUserRepository.existsByEmail(email)) {
+            throw new EmailAlreadyRegisteredException(email);
+        }
+
+        Customer customer = customerService.createEntity(
+                new CustomerRequest(request.name(), request.cpf(), request.birthDate()));
+
+        AppUser user = AppUser.builder()
+                .email(email)
+                .passwordHash(passwordEncoder.encode(request.password()))
+                .role(Role.CUSTOMER)
+                .customer(customer)
+                .build();
+
+        AppUser saved = appUserRepository.save(user);
+        return new RegisterResponse(saved.getId(), customer.getId(), saved.getEmail());
+    }
+
+    private String normalizeEmail(String email) {
+        return email.trim().toLowerCase();
+    }
+
+    @Transactional(readOnly = true)
+public AuthResponse login(LoginRequest request) {
+    String email = normalizeEmail(request.email());
+
+    authenticationManager.authenticate(
+            new UsernamePasswordAuthenticationToken(email, request.password()));
+
+    AppUser user = appUserRepository.findByEmail(email)
+            .orElseThrow(() -> new BadCredentialsException("Invalid email or password"));
+
+    String token = jwtService.generateToken(user);
+    return new AuthResponse(token, "Bearer", jwtService.expirationSeconds());
+}
+}

@@ -23,6 +23,14 @@ public class CustomerService {
         return customerMapper.toResponse(saved);
     }
 
+    @Transactional
+    public Customer createEntity(CustomerRequest request) {
+        if (customerRepository.existsByCpf(request.cpf())) {
+            throw new CpfAlreadyRegisteredException(request.cpf());
+        }
+        return customerRepository.save(customerMapper.toEntity(request));
+    }
+
     @Transactional(readOnly = true)
     public CustomerResponse findById(Long id) {
         Customer customer = customerRepository.findById(id)

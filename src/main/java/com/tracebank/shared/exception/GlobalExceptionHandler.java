@@ -6,8 +6,11 @@ import com.tracebank.transaction.InsufficientBalanceException;
 import com.tracebank.transaction.SelfTransferException;
 import com.tracebank.customer.CpfAlreadyRegisteredException;
 import com.tracebank.account.AccountNotFoundException;
+import com.tracebank.auth.EmailAlreadyRegisteredException;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -60,4 +63,18 @@ public class GlobalExceptionHandler {
         ErrorResponse erro = new ErrorResponse(LocalDateTime.now(), status.value(), mensagem);
         return ResponseEntity.status(status).body(erro);
     }
+
+    @ExceptionHandler(EmailAlreadyRegisteredException.class)
+    public ResponseEntity<ErrorResponse> handleEmailAlreadyRegistered
+
+    (EmailAlreadyRegisteredException ex) {
+    return build(HttpStatus.CONFLICT, ex.getMessage());
+    }
+
+    @ExceptionHandler(BadCredentialsException.class)
+    public ResponseEntity<ErrorResponse> handleBadCredentials(BadCredentialsException ex) {
+        return build(HttpStatus.UNAUTHORIZED, "Invalid email or password");
+}
+
+    
 }
