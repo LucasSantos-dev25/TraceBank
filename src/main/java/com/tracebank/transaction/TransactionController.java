@@ -1,5 +1,6 @@
 package com.tracebank.transaction;
 
+import java.util.List;
 import com.tracebank.transaction.dto.DepositRequest;
 import com.tracebank.transaction.dto.TransactionResponse;
 import com.tracebank.transaction.dto.TransferRequest;
@@ -39,5 +40,11 @@ public class TransactionController {
                                                       @Valid @RequestBody TransferRequest request) {
     TransactionResponse response = transactionService.transfer(accountId, request);
     return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    @GetMapping("/accounts/{accountId}/statement")
+    public ResponseEntity<List<TransactionResponse>> getStatement(@PathVariable Long accountId) {
+        List<TransactionResponse> statement = transactionService.getStatement(accountId);
+        return ResponseEntity.ok(statement);
 }
 }

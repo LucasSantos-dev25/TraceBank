@@ -1,5 +1,5 @@
 package com.tracebank.transaction;
-
+import java.util.List;
 import com.tracebank.account.Account;
 import com.tracebank.account.AccountService;
 import com.tracebank.account.AccountStatus;
@@ -100,5 +100,14 @@ public TransactionResponse transfer(Long accountId, TransferRequest request) {
 
     Transaction saved = transactionRepository.save(transaction);
     return transactionMapper.toResponse(saved);
+    }
+
+    @Transactional(readOnly = true)
+    public List<TransactionResponse> getStatement(Long accountId) {
+    accountService.findEntityById(accountId); // garante 404 se a conta não existir
+
+    return transactionRepository.findByAccountId(accountId).stream()
+            .map(transactionMapper::toResponse)
+            .toList();
     }
 }
