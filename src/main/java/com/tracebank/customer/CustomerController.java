@@ -15,12 +15,6 @@ public class CustomerController {
 
     private final CustomerService customerService;
 
-    @PostMapping
-    @ApiCreateCustomer
-    public ResponseEntity<CustomerResponse> create(@Valid @RequestBody CustomerRequest request) {
-        CustomerResponse response = customerService.create(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
-    }
 
     @GetMapping("/{id}")
     public ResponseEntity<CustomerResponse> findById(@PathVariable Long id) {
