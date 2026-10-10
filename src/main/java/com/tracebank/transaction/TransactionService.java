@@ -5,6 +5,8 @@ import com.tracebank.account.AccountService;
 import com.tracebank.account.AccountStatus;
 import com.tracebank.transaction.dto.DepositRequest;
 import com.tracebank.transaction.dto.TransactionResponse;
+import com.tracebank.transaction.dto.WithdrawalRequest;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -38,5 +40,30 @@ public class TransactionService {
 
         Transaction saved = transactionRepository.save(transaction);
         return transactionMapper.toResponse(saved);
+    }
+
+    @Transactional
+public TransactionResponse withdraw(Long accountId, WithdrawalRequest request) {
+    Account account = accountService.findEntityById(accountId);
+
+    if (account.getStatus() != AccountStatus.ACTIVE) {
+        throw new AccountNotActiveException(accountId);
+    }
+
+    if (account.getBalance().compareTo(request.amount()) < 0) {
+        throw new InsufficientBalanceException(accountId);
+    }
+
+    account.setBalance(account.getBalance().subtract(request.amount()));
+
+    Transaction transaction = Transaction.builder()
+            .type(TransactionType.WITHDRAWAL)
+            .amount(request.amount())
+            .timestamp(LocalDateTime.now())
+            .sourceAccount(account)
+            .build();
+
+    Transaction saved = transactionRepository.save(transaction);
+    return transactionMapper.toResponse(saved);
     }
 }

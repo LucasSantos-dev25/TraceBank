@@ -2,6 +2,8 @@ package com.tracebank.transaction;
 
 import com.tracebank.transaction.dto.DepositRequest;
 import com.tracebank.transaction.dto.TransactionResponse;
+import com.tracebank.transaction.dto.WithdrawalRequest;
+
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -20,5 +22,13 @@ public class TransactionController {
                                                          @Valid @RequestBody DepositRequest request) {
         TransactionResponse response = transactionService.deposit(accountId, request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    @PostMapping("/accounts/{accountId}/withdrawals")
+    @ApiWithdraw
+    public ResponseEntity<TransactionResponse> withdraw(@PathVariable Long accountId,
+                                                      @Valid @RequestBody WithdrawalRequest request) {
+    TransactionResponse response = transactionService.withdraw(accountId, request);
+    return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 }
