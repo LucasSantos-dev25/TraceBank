@@ -12,6 +12,11 @@ spring:
     properties:
       hibernate:
         format_sql: true
+  
+  security:
+  jwt:
+    secret: ${JWT_SECRET}
+    expiration: ${JWT_EXPIRATION}
 
   flyway:
     enabled: true
