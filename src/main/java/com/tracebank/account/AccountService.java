@@ -44,6 +44,12 @@ public class AccountService {
         return accountMapper.toResponse(account);
     }
 
+    @Transactional(readOnly = true)
+    public Account findEntityById(Long id) {
+    return accountRepository.findById(id)
+            .orElseThrow(() -> new AccountNotFoundException(id));
+}
+
     private String generateAccountNumber() {
         return UUID.randomUUID().toString().substring(0, 8).toUpperCase();
     }
