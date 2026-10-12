@@ -15,7 +15,8 @@ import java.lang.annotation.Target;
 @ApiResponses({
         @ApiResponse(responseCode = "201", description = "Deposit completed successfully"),
         @ApiResponse(responseCode = "400", description = "Invalid data"),
-        @ApiResponse(responseCode = "404", description = "Account not found"),
+        @ApiResponse(responseCode = "401", description = "Missing, invalid or expired token"),
+        @ApiResponse(responseCode = "403", description = "The account does not belong to the authenticated user (or does not exist)"),
         @ApiResponse(responseCode = "422", description = "Account is not active")
 })
 public @interface ApiDeposit {
