@@ -25,6 +25,7 @@ Sistemas financeiros precisam de uma base confiável para manter saldos e histó
 - **Spring Security** com **JWT** (stateless, HS256)
 - **Bean Validation**, **OpenAPI/Swagger** (springdoc) e **Actuator**
 - **JUnit 5**, **Mockito** e **Testcontainers** (Postgres real nos testes de integração)
+- **Docker** e **Docker Compose** (build multi-stage, usuário não-root, healthchecks)
 
 ## Arquitetura
 
@@ -134,6 +135,16 @@ As migrations do Flyway são aplicadas automaticamente. Para conferir:
 curl http://localhost:8080/actuator/health
 ```
 
+### Alternativa: tudo em containers (API + PostgreSQL)
+
+Com o `.env` preenchido (as mesmas variáveis acima) e o Docker em execução:
+
+```bash
+docker compose up --build
+```
+
+A API sobe em `http://localhost:8080` com um PostgreSQL próprio e persistente (volume), e as migrations são aplicadas automaticamente. O banco do container fica exposto na porta `5433` do host, para não conflitar com um PostgreSQL local. Para encerrar: `docker compose down` (use `-v` para apagar também os dados).
+
 ### Exemplo de uso
 
 ```bash
@@ -173,3 +184,4 @@ curl -X POST http://localhost:8080/accounts/1/deposits -H "Authorization: Bearer
 - **Respostas de autenticação iguais** para e-mail inexistente e senha errada, e mitigação de *timing attack* no login (o Spring executa a comparação BCrypt também quando o usuário não existe), para dificultar a enumeração de usuários.
 - **JWT de curta duração** e nunca com dados sensíveis no payload (ele é assinado, não criptografado).
 - **`GlobalExceptionHandler` centralizado:** nenhum `try/catch` espalhado pelos controllers.
+
