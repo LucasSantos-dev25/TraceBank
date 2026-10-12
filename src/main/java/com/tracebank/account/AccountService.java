@@ -1,9 +1,9 @@
 package com.tracebank.account;
 
-import com.tracebank.customer.Customer;
-import com.tracebank.customer.CustomerService;
 import com.tracebank.account.dto.AccountRequest;
 import com.tracebank.account.dto.AccountResponse;
+import com.tracebank.customer.Customer;
+import com.tracebank.customer.CustomerService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -39,16 +39,19 @@ public class AccountService {
 
     @Transactional(readOnly = true)
     public AccountResponse findById(Long id) {
-        Account account = accountRepository.findById(id)
-                .orElseThrow(() -> new AccountNotFoundException(id));
-        return accountMapper.toResponse(account);
+        return accountMapper.toResponse(findEntityById(id));
     }
 
     @Transactional(readOnly = true)
     public Account findEntityById(Long id) {
-    return accountRepository.findById(id)
-            .orElseThrow(() -> new AccountNotFoundException(id));
-}
+        return accountRepository.findById(id)
+                .orElseThrow(() -> new AccountNotFoundException(id));
+    }
+
+    @Transactional(readOnly = true)
+    public boolean isOwnedBy(Long accountId, Long customerId) {
+        return accountRepository.existsByIdAndCustomerId(accountId, customerId);
+    }
 
     private String generateAccountNumber() {
         return UUID.randomUUID().toString().substring(0, 8).toUpperCase();
